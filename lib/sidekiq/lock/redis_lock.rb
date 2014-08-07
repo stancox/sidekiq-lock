@@ -21,7 +21,11 @@ module Sidekiq
       # this also requires redis-rb >= 3.0.5
       def acquire!
         @acquired ||= Sidekiq.redis do |r|
-          r.set(name, value, { nx: true, px: timeout })
+          if timeout
+            r.set(name, value, { nx: true, px: timeout })
+          else
+            r.set(name, value, { nx: true })
+          end
         end
       end
 
@@ -43,7 +47,7 @@ module Sidekiq
 
       def timeout
         raise ArgumentError, "Provide lock timeout inside sidekiq_options" if options[:timeout].nil?
-
+        return false unless options[:timeout]
         @timeout ||= (options[:timeout].respond_to?(:call) ? options[:timeout].call(*payload) : options[:timeout]).to_i
       end
 
