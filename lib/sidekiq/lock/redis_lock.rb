@@ -47,7 +47,7 @@ module Sidekiq
 
       def timeout
         raise ArgumentError, "Provide lock timeout inside sidekiq_options" if options[:timeout].nil?
-        return false unless options[:timeout]
+        @timeout ||= false unless options[:timeout]
         @timeout ||= (options[:timeout].respond_to?(:call) ? options[:timeout].call(*payload) : options[:timeout]).to_i
       end
 
